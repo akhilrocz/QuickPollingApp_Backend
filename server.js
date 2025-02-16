@@ -67,8 +67,8 @@ app.get("/polls", async (req, res) => {
 
 app.post("/polls/:id/vote", async (req, res) => {
   try {
-    const { pollId, optionIndex } = req.body;
-    const poll = await Poll.findById(pollId);
+    const {  optionIndex } = req.body;
+    const poll = await Poll.findById(req.params.id);
     if (!poll) {
       return res.status(404).send("Poll not found");
     }
