@@ -27,8 +27,7 @@ mongoose
 
 const pollSchema = new mongoose.Schema({
   question: String,
-  options: [String],
-  votes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vote" }],
+  options: [{ text: String, votes: Number }],
 });
 
 const Poll = mongoose.model("Poll", pollSchema);
@@ -36,15 +35,23 @@ const Poll = mongoose.model("Poll", pollSchema);
 app.post("/polls", async (req, res) => {
   try {
     const { question, options } = req.body;
+
+    if (!question || !options || options.length < 2) {
+      return res
+        .status(400)
+        .json({ error: "Question and at least two options are required." });
+    }
+
     const poll = new Poll({
       question,
       options: options.map((option) => ({ text: option, votes: 0 })),
     });
+
     await poll.save();
-    res.json(express.response);
+    res.status(201).json(poll);
   } catch (error) {
-    console.log("Error creating poll:", error);
-    res.status(500).send("Error creating poll");
+    console.error("Error creating poll:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
